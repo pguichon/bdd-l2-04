@@ -1,0 +1,238 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<title>reveal.js</title>
+
+	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/theme/black.css">
+
+	<!-- Theme used for syntax highlighting of code -->
+	<link rel="stylesheet" href="lib/css/zenburn.css">
+
+	<!-- Printing and PDF exports -->
+	<script>
+		var link = document.createElement('link');
+		link.rel = 'stylesheet';
+		link.type = 'text/css';
+		link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+		document.getElementsByTagName('head')[0].appendChild(link);
+	</script>
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<section>Cours 4</section>
+			<section>
+				<h4>La clause WHERE</h4>
+				<div>
+
+					WHERE champs (condition)
+					<ul>
+						<li>= : WHERE champ=valeur</li>
+						<li>ISNULL : WHERE champ ISNULL</li>
+						<li>NOTNULL (NOT NULL) : WHERE champ NOTNULL</li>
+						<li> (NOT) IN : WHERE champ (NOT) IN tableau</li>
+						<li>(NOT) BETWEEN : WHERE champ (NOT) BETWEEN valeur AND valeur2</li>
+					</ul>
+
+				</div>
+			</section>
+			<section>
+				<h4>La clause WHERE = </h4>
+				<div>
+					La clause WHERE va mettre en relation la ou les tables de référence en respectant la clause =
+					<table>
+						<thead>
+							<tr>
+								<td>id</td>
+								<td>code</td>
+								<td>label</td>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>1</td>
+								<td>M</td>
+								<td>Homme</td>
+							</tr>
+							<tr>
+								<td>2</td>
+								<td>F</td>
+								<td>Femme</td>
+							</tr>
+						</tbody>
+					</table>
+					<pre>
+						<code class="sql" data-trim>
+							SELECT nom, prenom FROM individu WHERE sexe='M';
+							SELECT i.nom, i.prenom, s.label FROM INDIVIDU as i, SEXE as s 
+							WHERE i.sexe='M' AND s.code='M'
+						</code>
+					</pre>
+				</div>
+			</section>
+			<section>
+				<h4>Mais encore plus !</h4>
+				<pre>
+						<code class="sql" data-trim>
+							SELECT i.nom, i.prenom, s.label FROM INDIVIDU as i, SEXE as s 
+							WHERE i.sexe_id=s.id;
+						</code>
+					</pre> c'est équivalent à
+				<pre>
+						<code class="sql" data-trim>
+							SELECT i.nom, i.prenom, s.label FROM INDIVIDU as i INNER JOIN
+							 SEXE as s 
+							ON i.sexe_id=s.id;
+						</code>
+					</pre>
+			</section>
+
+			<section>
+				<h4>La clause IN</h4>
+				<p>rappel : Tout resultat d'une requête sql porte sur un tableau et renvoit un tableau</p>
+				<pre>
+						<code class="sql" data-trim>
+							SELECT i.nom, i.prenom FROM INDIVIDU as i WHERE i.sexe 
+							IN (SELECT code FROM sexe WHERE id=1);
+						</code>
+					</pre>
+			</section>
+			<section>
+				<h4>Les fonctions</h4>
+				<p>
+					Une fonction est une opération prédéfinie qui va s'executer sur le champ indiqué pour chaque ligne d'un tableau donnée. Un
+					premier type de fonction : aggregate fonction. les aggregates fonction vont pour un champs de l'ensemble des lignes
+					d'un tableau effectuer une opération
+					<ul>
+						<li>count()</li>
+						<li>max()</li>
+						<li>min()</li>
+						<li>sum()</li>
+					</ul>
+				</p>
+			</section>
+			<section>
+				<h4>count()</h4>
+				<pre>
+						<code class="sql" data-trim>
+							SELECT count(*) FROM INDIVIDU;
+							 -- le nombre d'individu
+							SELECT count(nom) FROM INDIVIDU;
+							 --le nombre d'individu ayant un nom
+						</code>
+					</pre>
+			</section>
+			<section>
+				<h4>max(), min(), sum()</h4>
+				<pre>
+						<code class="sql" data-trim>
+							SELECT max(taille) FROM INDIVIDU;
+							 -- la plus grande taille présente
+							SELECT min(taille) FROM INDIVIDU;
+							 -- la plus petite taille présente
+							
+							SELECT sum(distance) FROM parcours
+							 WHERE num_parcour=1;
+							  --la distance total du parcours1
+						</code>
+					</pre>
+			</section>
+			<section>
+				<h4>Les fonctions ordinaires</h4>
+				<p>Les fonctions ordinaires vont s'effectuer pour le champs indiqué pour chaque ligne du tableau</p>
+				<ul>
+					<li>lower()</li>
+					<li>upper()</li>
+					<li>length()</li>
+					<li>round()</li>
+				</ul>
+			</section>
+			<section>
+				<pre>
+						<code class="sql" data-trim>
+							SELECT lower(nom), upper(prenom) FROM INDIVIDU;
+							 -- nom en minuscule, prenom en majuscule
+							SELECT nom, prenom FROM INDIVIDU WHERE length(nom)=4;
+							 -- les nom et prenom des personnes dont
+							 -- la longeur du nom est 4
+							
+							SELECT label FROM article WHERE round(price)=4; 
+							  -- les articles dont le prix est compris entre 3.5 et 4.5
+						</code>
+					</pre>
+			</section>
+			<section>
+				<h4>GROUP BY</h4>
+				<p>La clause GROUPE BY (**champ) créer des sous tableaux en regroupant les lignes par ordre des champs indiqués</p>
+				<pre>
+						<code class="sql" data-trim>
+							SELECT nom, prenom, sexe FROM INDIVIDU
+							 GROUP BY (sexe);
+							 -- un tableau contenant deux sous tableaux
+							SELECT nom, prenom, age, sexe FROM INDIVIDU 
+							GROUP BY (age, sexe);
+							 -- donnera des tableaux par age et à l'interieur par sexe
+						</code>
+					</pre>
+			</section>
+			<section>
+				<p>Attention l'ordre des champs est super important</p>
+				<pre>
+						<code class="sql" data-trim>
+						
+							SELECT nom, prenom, age, sexe FROM INDIVIDU 
+							GROUP BY (age, sexe);
+
+							SELECT nom, prenom, age, sexe FROM INDIVIDU
+							 GROUP BY (sexe, age);
+						</code>
+					</pre>
+			</section>
+			<section>
+				<h4>GROUP BY + aggregate fonctions</h4>
+				<pre>
+						<code class="sql" data-trim>
+							SELECT sexe, count(sexe) FROM INDIVIDU GROUP BY (sexe);
+							 -- M | 34
+							 -- F| 56
+							SELECT age, sexe, count(sexe) FROM INDIVIDU
+							 GROUP BY (age, sexe) ORDER BY (age, sexe);
+							 -- 21 | M | 35 
+							 -- 21 | F | 10
+							 -- 23 | M | 3
+							 -- 23 | F | 0  
+						</code>
+					</pre>
+			</section>
+			<section>
+				<h3>Finito. <br>A demain !!!!</h3>
+			</section>
+		</div>
+	</div>
+
+	<script src="lib/js/head.min.js"></script>
+	<script src="js/reveal.js"></script>
+
+	<script>
+		// More info https://github.com/hakimel/reveal.js#configuration
+		Reveal.initialize({
+			history: true,
+
+			// More info https://github.com/hakimel/reveal.js#dependencies
+			dependencies: [
+				{ src: 'plugin/markdown/marked.js' },
+				{ src: 'plugin/markdown/markdown.js' },
+				{ src: 'plugin/notes/notes.js', async: true },
+				{ src: 'plugin/highlight/highlight.js', async: true, callback: function () { hljs.initHighlightingOnLoad(); } }
+			]
+		});
+	</script>
+</body>
+
+</html>
